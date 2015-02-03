@@ -1,6 +1,7 @@
 
 package org.usfirst.frc.team649.robot;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -18,15 +19,42 @@ public class Robot extends IterativeRobot {
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
+	Victor liftMotor1, liftMotor2, intakeMotorRight, intakeMotorLeft, rollerMotorRight, rollerMotorLeft, autoWinch;
+	DoubleSolenoid grabberPiston1, grabberPiston2;
 	Victor[] motors;
 	Joystick driverRightJoystick;
 	Joystick driverLeftJoystick;
+	Joystick operatorJoystick;
+	public static final double INTAKE_ARM_IN_POWER = 0.2;
+	public static final double INTAKE_ARM_OUT_POWER = -0.4;
+	public static final double ROLLERS_IN_POWER = 0.4;
+	public static final double ROLLER_OUT_POWER = -0.2;
+	boolean grabberState;
 	
     public void robotInit() {
+    	driverLeftJoystick = new Joystick(0);
+    	driverRightJoystick = new Joystick(1);
+    	operatorJoystick = new Joystick(2);
+    	
+    	liftMotor1 = new Victor(0);
+    	liftMotor2 = new Victor(1);
+    	intakeMotorRight = new Victor(2);
+    	intakeMotorLeft = new Victor(3);
+    	rollerMotorRight = new Victor(8);
+    	rollerMotorLeft = new Victor(9);
+    	autoWinch = new Victor(10);
+    	grabberPiston1 = new DoubleSolenoid(0, 1);
+    	grabberPiston2 = new DoubleSolenoid(2, 3);
+    	
     	motors = new Victor[4];
-    	for(int i =0; i<4; i++) {
-    		motors[i] = new Victor(i);
-    	}
+    	motors[0] = new Victor(4);
+    	motors[1] = new Victor(5);
+    	motors[2] = new Victor(6);
+    	motors[3] = new Victor(7);
+    	
+    	//true == closed, false == open
+    	grabberState = false;
+    	
     }
 
     /**
@@ -41,7 +69,25 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
     	driveFwdRot(getDriveForward(), getDriveRotation());
+        setLiftPower(operatorJoystick.getAxis(Joystick.AxisType.kY));
         
+        if(operatorJoystick.getRawButton(8)) {
+        	setIntakeArmsPower(INTAKE_ARM_IN_POWER);
+        } 
+        
+        if(operatorJoystick.getRawButton(9)) {
+        	setIntakeArmsPower(INTAKE_ARM_OUT_POWER);
+        }
+        
+        if(operatorJoystick.getRawButton(5)) {
+        	setRollerPower(ROLLER_OUT_POWER);
+        }
+        
+        if(operatorJoystick.getRawButton(3)) {
+        	setRollerPower(ROLLERS_IN_POWER);
+        }
+        
+      //  if(grabberState)
     }
     
     /**
@@ -72,14 +118,30 @@ public class Robot extends IterativeRobot {
 
     public void rawDrive(double left, double right) {
         int i = 0;
-
-        for (; i < motors.length / 2; i++) {
-            motors[i].set(left);
-        }
-
-        for (; i < motors.length; i++) {
-            motors[i].set(-right);
-        }
+        //right
+        motors[0].set(-right);
+        motors[1].set(-right);
+        //left
+        motors[2].set(left);
+        motors[3].set(left);
     }
-
+    
+    public void setLiftPower(double power) {
+    	liftMotor1.set(power);
+    	liftMotor1.set(power);
+    }
+    
+    public void setIntakeArmsPower(double power) {
+    	intakeMotorLeft.set(power);
+    	intakeMotorRight.set(power);
+    }
+    
+    public void setRollerPower(double power) {
+    	rollerMotorLeft.set(power);
+    	rollerMotorRight.set(power);
+    }
+    
+    public void toggleGrabberPistons() {
+    	
+    }
 }
