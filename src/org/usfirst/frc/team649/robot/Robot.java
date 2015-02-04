@@ -2,6 +2,7 @@
 package org.usfirst.frc.team649.robot;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -29,6 +30,7 @@ public class Robot extends IterativeRobot {
 	public static final double INTAKE_ARM_OUT_POWER = -0.4;
 	public static final double ROLLERS_IN_POWER = 0.4;
 	public static final double ROLLER_OUT_POWER = -0.2;
+	public static final double AUTO_WINCH_IN_POWER = 0.6;
 	boolean grabberState;
 	
     public void robotInit() {
@@ -87,7 +89,14 @@ public class Robot extends IterativeRobot {
         	setRollerPower(ROLLERS_IN_POWER);
         }
         
-      //  if(grabberState)
+        if(operatorJoystick.getRawButton(1) && operatorJoystick.getRawButton(1) != grabberState) {
+        	grabberState = !grabberState;
+        	setGrabberPistons(grabberState ? Value.kForward: Value.kReverse);
+        }
+        
+        if(operatorJoystick.getRawButton(10)) {
+        	runAutoWinch(AUTO_WINCH_IN_POWER);
+        }
     }
     
     /**
@@ -141,7 +150,12 @@ public class Robot extends IterativeRobot {
     	rollerMotorRight.set(power);
     }
     
-    public void toggleGrabberPistons() {
-    	
+    public void setGrabberPistons(Value state) {
+    	grabberPiston1.set(state);
+    	grabberPiston2.set(state);
+    }
+    
+    public void runAutoWinch(double power) {
+    	autoWinch.set(power);
     }
 }
