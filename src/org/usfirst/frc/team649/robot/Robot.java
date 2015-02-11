@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -75,18 +76,18 @@ public class Robot extends IterativeRobot {
         
         if(operatorJoystick.getRawButton(8)) {
         	setIntakeArmsPower(INTAKE_ARM_IN_POWER);
-        } 
-        
-        if(operatorJoystick.getRawButton(9)) {
+        } else if(operatorJoystick.getRawButton(9)) {
         	setIntakeArmsPower(INTAKE_ARM_OUT_POWER);
+        } else {
+        	setIntakeArmsPower(0);
         }
         
         if(operatorJoystick.getRawButton(5)) {
         	setRollerPower(ROLLER_OUT_POWER);
-        }
-        
-        if(operatorJoystick.getRawButton(3)) {
+        } else if(operatorJoystick.getRawButton(3)) {
         	setRollerPower(ROLLERS_IN_POWER);
+        } else {
+        	setRollerPower(0);
         }
         
         if(operatorJoystick.getRawButton(1) && operatorJoystick.getRawButton(1) != grabberState) {
@@ -96,7 +97,11 @@ public class Robot extends IterativeRobot {
         
         if(operatorJoystick.getRawButton(10)) {
         	runAutoWinch(AUTO_WINCH_IN_POWER);
+        } else {
+        	runAutoWinch(0);
         }
+        
+        SmartDashboard.putString("trest", "tesr");
     }
     
     /**
