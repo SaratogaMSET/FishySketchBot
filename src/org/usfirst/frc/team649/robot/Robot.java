@@ -1,12 +1,17 @@
 
 package org.usfirst.frc.team649.robot;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.hal.PDPJNI;
+import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -27,6 +32,9 @@ public class Robot extends IterativeRobot {
 	Joystick driverRightJoystick;
 	Joystick driverLeftJoystick;
 	Joystick operatorJoystick;
+	PowerDistributionPanel pdp;
+	double currentPeak;
+	
 	public static final double INTAKE_ARM_IN_POWER = 0.2;
 	public static final double INTAKE_ARM_OUT_POWER = -0.4;
 	public static final double ROLLERS_IN_POWER = 0.4;
@@ -34,15 +42,21 @@ public class Robot extends IterativeRobot {
 	public static final double AUTO_WINCH_IN_POWER = 0.6;
 	boolean grabberState;
 	
+	AnalogInput leftArmPot;
+	AnalogInput rightArmPot;
+	Encoder liftEnc;
+	
     public void robotInit() {
     	driverLeftJoystick = new Joystick(0);
     	driverRightJoystick = new Joystick(1);
     	operatorJoystick = new Joystick(2);
     	
-    	liftMotor1 = new Victor(0);
-    	liftMotor2 = new Victor(1);
+    	pdp = new PowerDistributionPanel();
+    	
+    	liftMotor1 = new Victor(17);
+    	liftMotor2 = new Victor(18);
     	intakeMotorRight = new Victor(2);
-    	intakeMotorLeft = new Victor(3);
+    	intakeMotorLeft = new Victor(0);
     	rollerMotorRight = new Victor(8);
     	rollerMotorLeft = new Victor(9);
     	autoWinch = new Victor(10);
@@ -57,6 +71,13 @@ public class Robot extends IterativeRobot {
     	
     	//true == closed, false == open
     	grabberState = false;
+    	
+    	currentPeak = 0.0;
+    	
+    	liftEnc = new Encoder(0, 1);
+    	leftArmPot = new AnalogInput(4);
+    	rightArmPot = new AnalogInput(5);
+    	
     	
     }
 
@@ -101,6 +122,17 @@ public class Robot extends IterativeRobot {
         	runAutoWinch(0);
         }
         
+        if(operatorJoystick.getRawButton(4)) {
+        	currentPeak = 0.0;
+        }
+        
+        showLiftCurrentPeaks();
+        
+        //SmartDashboard.putNumber("Current", pdp.);
+     //   SmartDashboard.putData(liftEnc);
+        SmartDashboard.putData("enc", liftEnc);
+        SmartDashboard.putData("leftPot", leftArmPot);
+        SmartDashboard.putData("rightpot", rightArmPot);
         SmartDashboard.putString("trest", "tesr");
     }
     
@@ -142,7 +174,7 @@ public class Robot extends IterativeRobot {
     
     public void setLiftPower(double power) {
     	liftMotor1.set(power);
-    	liftMotor1.set(power);
+    	liftMotor2.set(-power);
     }
     
     public void setIntakeArmsPower(double power) {
@@ -162,5 +194,14 @@ public class Robot extends IterativeRobot {
     
     public void runAutoWinch(double power) {
     	autoWinch.set(power);
+    }
+    
+    public void showLiftCurrentPeaks() {
+    	double avgCurrent = ((pdp.getCurrent(13) + pdp.getCurrent(12)) / 2); 
+    	if(currentPeak <= avgCurrent) {
+    		currentPeak = avgCurrent;
+    	}
+    	SmartDashboard.putNumber("Current", avgCurrent);
+    	SmartDashboard.putNumber("CurrentPeak", currentPeak);
     }
 }
