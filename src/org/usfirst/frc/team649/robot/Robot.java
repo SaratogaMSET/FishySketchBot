@@ -2,6 +2,7 @@
 package org.usfirst.frc.team649.robot;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Encoder;
@@ -44,7 +45,11 @@ public class Robot extends IterativeRobot {
 	
 	AnalogInput leftArmPot;
 	AnalogInput rightArmPot;
+	DigitalInput leftArmLimit, rightArmLimit, toteLeftLimit, toteRightLimit, topHal, bottomHal;
 	Encoder liftEnc;
+	Encoder driveLeftEnc;
+	Encoder driveRightEnc;
+	
 	
     public void robotInit() {
     	driverLeftJoystick = new Joystick(0);
@@ -57,11 +62,15 @@ public class Robot extends IterativeRobot {
     	liftMotor2 = new Victor(18);
     	intakeMotorRight = new Victor(2);
     	intakeMotorLeft = new Victor(0);
-    	rollerMotorRight = new Victor(8);
-    	rollerMotorLeft = new Victor(9);
+    	rollerMotorRight = new Victor(3);
+    	rollerMotorLeft = new Victor(1);
     	autoWinch = new Victor(10);
     	grabberPiston1 = new DoubleSolenoid(0, 1);
     	grabberPiston2 = new DoubleSolenoid(2, 3);
+    	
+    	//TODO - Move tote left limit to port 9 on robo-rio
+    	toteLeftLimit = new DigitalInput(9);
+    	toteRightLimit = new DigitalInput(11);
     	
     	motors = new Victor[4];
     	motors[0] = new Victor(4);
@@ -74,11 +83,19 @@ public class Robot extends IterativeRobot {
     	
     	currentPeak = 0.0;
     	
-    	liftEnc = new Encoder(0, 1);
-    	leftArmPot = new AnalogInput(4);
-    	rightArmPot = new AnalogInput(5);
+    	liftEnc = new Encoder(4, 5);
     	
+    	leftArmPot = new AnalogInput(0);
+    	leftArmLimit = new DigitalInput(6);
     	
+    	rightArmPot = new AnalogInput(1);
+    	rightArmLimit = new DigitalInput(7);
+    	
+    	driveLeftEnc = new Encoder(0, 1);
+    	driveRightEnc = new Encoder(2, 3);
+    	
+    	topHal = new DigitalInput(12);
+    	bottomHal = new DigitalInput(13);
     }
 
     /**
@@ -128,12 +145,18 @@ public class Robot extends IterativeRobot {
         
         showLiftCurrentPeaks();
         
-        //SmartDashboard.putNumber("Current", pdp.);
-     //   SmartDashboard.putData(liftEnc);
+
         SmartDashboard.putData("enc", liftEnc);
-        SmartDashboard.putData("leftPot", leftArmPot);
-        SmartDashboard.putData("rightpot", rightArmPot);
-        SmartDashboard.putString("trest", "tesr");
+        SmartDashboard.putData("DriveLeftEnc", driveLeftEnc);
+        SmartDashboard.putData("DriveRightEnc", driveRightEnc);
+        SmartDashboard.putNumber("leftPot", leftArmPot.getVoltage());
+        SmartDashboard.putNumber("rightpot", rightArmPot.getVoltage());
+        SmartDashboard.putBoolean("Left Arm", leftArmLimit.get());
+        SmartDashboard.putBoolean("Right Arm", rightArmLimit.get());
+        SmartDashboard.putBoolean("Tote Left", isLeftToteLimitPressed());
+        SmartDashboard.putBoolean("Right Tote", isRightToteLimitPressed());
+        SmartDashboard.putBoolean("Top Hal", isTopHalTripped());
+        SmartDashboard.putBoolean("Bottom Hal", isBottomHalTripped());
     }
     
     /**
@@ -179,7 +202,7 @@ public class Robot extends IterativeRobot {
     
     public void setIntakeArmsPower(double power) {
     	intakeMotorLeft.set(power);
-    	intakeMotorRight.set(power);
+    	intakeMotorRight.set(-power);
     }
     
     public void setRollerPower(double power) {
@@ -194,6 +217,26 @@ public class Robot extends IterativeRobot {
     
     public void runAutoWinch(double power) {
     	autoWinch.set(power);
+    }
+    
+    public boolean areArmsAtMax() {
+    	return leftArmLimit.get() || rightArmLimit.get();
+    }
+    
+    public boolean isLeftToteLimitPressed() {
+    	return !toteLeftLimit.get();
+    }
+    
+    public boolean isRightToteLimitPressed() {
+    	return !toteRightLimit.get();
+    }
+    
+    public boolean isTopHalTripped() {
+    	return !topHal.get();
+    }
+    
+    public boolean isBottomHalTripped() {
+    	return !bottomHal.get();
     }
     
     public void showLiftCurrentPeaks() {
