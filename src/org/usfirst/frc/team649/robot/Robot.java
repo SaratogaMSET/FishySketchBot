@@ -38,8 +38,8 @@ public class Robot extends IterativeRobot {
 	
 	public static final double INTAKE_ARM_IN_POWER = 0.2;
 	public static final double INTAKE_ARM_OUT_POWER = -0.4;
-	public static final double ROLLERS_IN_POWER = 0.4;
-	public static final double ROLLER_OUT_POWER = -0.2;
+	public static final double ROLLERS_IN_POWER = 1;
+	public static final double ROLLER_OUT_POWER = -1;
 	public static final double AUTO_WINCH_IN_POWER = 0.6;
 	boolean grabberState;
 	
@@ -120,6 +120,11 @@ public class Robot extends IterativeRobot {
         	setIntakeArmsPower(0);
         }
         
+        if(operatorJoystick.getRawButton(1)) {
+        	while(!isTopHalTripped()) {
+        		setLiftPower(0.2);
+        	}
+        }
         if(operatorJoystick.getRawButton(5)) {
         	setRollerPower(ROLLER_OUT_POWER);
         } else if(operatorJoystick.getRawButton(3)) {
@@ -157,6 +162,14 @@ public class Robot extends IterativeRobot {
         SmartDashboard.putBoolean("Right Tote", isRightToteLimitPressed());
         SmartDashboard.putBoolean("Top Hal", isTopHalTripped());
         SmartDashboard.putBoolean("Bottom Hal", isBottomHalTripped());
+        
+        SmartDashboard.putNumber("Lift Right Current", pdp.getCurrent(12));
+        SmartDashboard.putNumber("Lift Left Current", pdp.getCurrent(13));
+        SmartDashboard.putNumber("Left Arm Current", pdp.getCurrent(10));
+        SmartDashboard.putNumber("Right Arm Current", pdp.getCurrent(8)); 
+        SmartDashboard.putNumber("Roller Right Current", pdp.getCurrent(4));
+        SmartDashboard.putNumber("Left Roller Current", pdp.getCurrent(9));
+
     }
     
     /**
